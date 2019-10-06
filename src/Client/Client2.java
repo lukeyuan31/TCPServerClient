@@ -6,6 +6,7 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
 
+
 public class Client2 {
     Socket requestSocket;           //socket connect to the server
     ObjectOutputStream out;         //stream write to the socket
@@ -57,10 +58,18 @@ public class Client2 {
                         case ("1"): {
                             if (loginStatus == false) {
                                 sendMessage("login");
+                                System.out.println("Please input your username");
+                                String username=bufferedReader.readLine();
+                                sendMessage(username);
+                                System.out.println("Please input yout password");
+                                String password=bufferedReader.readLine();
+                                sendMessage(password);
                                 String response = (String) in.readObject();
                                 if (response.equals("success")) {
                                     System.out.println("Login successfully!");
                                     loginStatus = true;
+                                }else if (response.equals("fail")){
+                                    System.out.println("Unmatched username and password");
                                 }
                                 break;
                             } else {

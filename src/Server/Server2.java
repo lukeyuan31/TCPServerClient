@@ -6,11 +6,31 @@ import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
+import java.util.List;
 
+class User{
+    public String username;
+    public String password;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+}
 public class Server2 {
 
     private static final int sPort = 8000;   //The server will be listening on this port number
-
     public static void main(String[] args) throws Exception {
         System.out.println("The server is running.");
         ServerSocket listener = new ServerSocket(sPort);
@@ -38,6 +58,15 @@ public class Server2 {
         private ObjectInputStream in;	//stream read from the socket
         private ObjectOutputStream out;    //stream write to the socket
         private int no;		//The index number of the client
+        public static List<User> UserList = new ArrayList<User>();
+
+        public List<User> addUser(List<User> userList, String username, String password){
+            User newUser=new User();
+            newUser.setUsername(username);
+            newUser.setPassword(password);
+            userList.add(newUser);
+            return userList;
+        }
 
         public Handler(Socket connection, int no) {
             this.connection = connection;
@@ -67,9 +96,12 @@ public class Server2 {
         }
 
         public void run() {
-            String UserName;
+            //String UserName;
             boolean loginStatus=false;
             String command;
+            addUser(UserList,"user1","test1");
+            addUser(UserList,"user2","test2");
+            addUser(UserList,"user3","test3");
             try{
                 //initialize Input and Output streams
                 out = new ObjectOutputStream(connection.getOutputStream());
@@ -100,7 +132,21 @@ public class Server2 {
                             case ("login"):
                                 //System.out.println("recognize 1");
                                 //String message = "input username and password";
-                                sendMessage("success");
+                                String username=(String)in.readObject();
+                                String password=(String)in.readObject();
+                                for(User u:UserList){
+                                    //System.out.println(u.username+u.password);
+                                    //System.out.println(username+password);
+                                    if (u.getUsername().equals(username)&& u.getPassword().equals(password)){
+                                        sendMessage("success");
+                                        loginStatus=true;
+                                        break;
+                                    }
+                                }
+                                if (loginStatus==false){
+                                    sendMessage("fail");
+                                }
+                                //sendMessage("fail");
                                 //loginStatus=true;
                                 break;
                             case ("dir"): {
