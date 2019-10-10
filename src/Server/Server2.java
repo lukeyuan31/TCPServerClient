@@ -189,21 +189,31 @@ public class Server2 {
                             }
                             case ("get"):{
                                 String filename = (String)in.readObject();
-                                FileInputStream fis=new FileInputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Server/test1.txt");
-                                byte[] bytes = new byte[1024];
-                                int data;
-                                OutputStream os = connection.getOutputStream();
-                                while((data = fis.read(bytes))!= -1){
-                                    os.write(bytes, 0, data);
+                                File dir = new File(filename);
+                                if (dir.exists()){
+                                    sendMessage("true");
+                                    String directory=dir.getAbsolutePath();
+                                    FileInputStream fis=new FileInputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Server/test1.txt");
+                                    //FileInputStream fis =new FileInputStream(directory);
+                                    OutputStream os = connection.getOutputStream();
+                                    byte[] bytes = new byte[1024];
+                                    int data;
+
+                                    while((data = fis.read(bytes))!= -1){
+                                            os.write(bytes, 0, data);
                                     // System.out.println(data);
-                                }
+                                    }
                                 //connection.close();
-                                System.out.println("get complete");
-                                os.flush();
+                                //System.out.println("get complete");
+                                    os.flush();
                                 //connection.shutdownOutput();
                                 //fis.close();
                                 //os.close();
                                 break;
+                                }else {
+                                    sendMessage("nofile");
+                                    break;
+                                }
                             }
                             /*
                             case ("get"): {

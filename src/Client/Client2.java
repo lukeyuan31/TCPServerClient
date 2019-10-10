@@ -53,7 +53,7 @@ public class Client2 {
                     */
 
                     //System.out.print("Hello, please input a sentence: ");
-                    System.out.println("Please input one of the command \nftpclient [ip] [port]\nlogin\ndir\nget [filename]\nupload[filename]"  );
+                    System.out.println("\nPlease input one of the command \nftpclient [ip] [port]\nlogin\ndir\nget [filename]\nupload [filename]"  );
                     //read a sentence from the standard input
                     message = bufferedReader.readLine();
                     String[] inputline=message.split(" ");
@@ -124,19 +124,30 @@ public class Client2 {
                                 break;
                             } else {
                                 sendMessage("get");
-                                System.out.println("Input the name of the file you want to get");
-                                String filename = bufferedReader.readLine();
+                                //System.out.println("Input the name of the file you want to get");
+                                //String filename = bufferedReader.readLine();
+                                String filename=inputline[1];
                                 sendMessage(filename);
-                                FileOutputStream fos = new FileOutputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test2.txt");
-                                InputStream is = requestSocket.getInputStream();
-                                //System.out.println("file aquired!");
-                                byte[] bytes = new byte[1024];
-                                int data;
-                                data = is.read(bytes);
+                                String response = (String) in.readObject();
+                                if (response.equals("true")) {
+                                    File dir = new File(filename);
+                                    String directory =dir.getAbsolutePath();
+                                    //FileOutputStream fos = new FileOutputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test2.txt");
+                                    FileOutputStream fos = new FileOutputStream(directory);
+                                    InputStream is = requestSocket.getInputStream();
+                                    //System.out.println("file aquired!");
+                                    byte[] bytes = new byte[1024];
+                                    int data;
+                                    data = is.read(bytes);
                                     //System.out.println(data);
-                                fos.write(data);
-                                fos.flush();
-                                break;
+                                    fos.write(bytes,0,data);
+                                    fos.flush();
+                                    break;
+                                }
+                                else {
+                                    System.out.println("There is no such file on server!");
+                                    break;
+                                }
                             }
                         }
                         case ("upload"): {
@@ -144,23 +155,26 @@ public class Client2 {
                                 System.out.println("You need to login first");
                                 break;
                             } else {
-                                sendMessage("upload");
-                                System.out.println("Input the name of the file you want to upload");
-                                String filename = bufferedReader.readLine();
+
+                                //System.out.println("Input the name of the file you want to upload");
+                                String filename = inputline[1];
                                 File dir = new File(filename);
-                                sendMessage(filename);
-                                String status = (String) in.readObject();
+                                if (dir.exists()){
+                                    System.out.println("file exists!");
+                                    sendMessage("upload");
+                                    sendMessage(filename);
+                                    String status = (String) in.readObject();
                                 if (status.equals("ready")) {
                                     String directory = dir.getAbsolutePath();
                                     System.out.println(directory);
                                     OutputStream os = requestSocket.getOutputStream();
-                                    directory="/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test.txt";
+                                    //directory = "/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test.txt";
                                     //FileInputStream fis = new FileInputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test.txt");
                                     FileInputStream fis = new FileInputStream(directory);
                                     byte[] bytes = new byte[1024];
                                     int data;
                                     while ((data = fis.read(bytes)) != -1) {
-                                        os.write(bytes,0,data);
+                                        os.write(bytes, 0, data);
                                         // System.out.println(data);
                                     }
                                     //os.write(-1);
@@ -176,9 +190,14 @@ public class Client2 {
                                     break;
                                 }
                             }
+                                else {
+                                    System.out.println("File not exist!");
+                                    break;
+                                }
+                            }
                         }
                         default:{
-                            System.out.println("Unknown command");
+                            System.out.println("Unknown command!");
                         }
 
 
