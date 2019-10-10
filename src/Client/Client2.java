@@ -14,6 +14,7 @@ public class Client2 {
     String message;                //message send to the server
     String MESSAGE;                //capitalized message read from the server
     boolean loginStatus=false;
+    boolean connectionStatus=false;
 
     public void Client() {}
 
@@ -41,6 +42,7 @@ public class Client2 {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
             while(true)
             {
+                /*
                 if(requestSocket==null){
                     requestSocket = new Socket("localhost",8000);
                     out = new ObjectOutputStream(requestSocket.getOutputStream());
@@ -48,36 +50,64 @@ public class Client2 {
                     in = new ObjectInputStream(requestSocket.getInputStream());
                 }
                 else {
+                    */
+
                     //System.out.print("Hello, please input a sentence: ");
-                    System.out.println("Please select your move \n1. login\n2. dir\n3. get\n4. upload");
+                    System.out.println("Please input one of the command \nftpclient [ip] [port]\nlogin\ndir\nget [filename]\nupload[filename]"  );
                     //read a sentence from the standard input
                     message = bufferedReader.readLine();
+                    String[] inputline=message.split(" ");
+                    String command=inputline[0];
                     //Send the sentence to the server
                     //sendMessage(message);
-                    switch (message) {
-                        case ("1"): {
-                            if (loginStatus == false) {
-                                sendMessage("login");
-                                System.out.println("Please input your username");
-                                String username=bufferedReader.readLine();
-                                sendMessage(username);
-                                System.out.println("Please input yout password");
-                                String password=bufferedReader.readLine();
-                                sendMessage(password);
-                                String response = (String) in.readObject();
-                                if (response.equals("success")) {
-                                    System.out.println("Login successfully!");
-                                    loginStatus = true;
-                                }else if (response.equals("fail")){
-                                    System.out.println("Unmatched username and password");
+                    switch (command) {
+                        case ("ftpclient"):{
+                            if (connectionStatus == true){
+                                System.out.println("Already connected");
+                            }else {
+                                String ip = inputline[1];
+                                String host = inputline[2];
+                                if (ip.equals("localhost") && host.equals("8000")) {
+                                    requestSocket = new Socket("localhost", 8000);
+                                    out = new ObjectOutputStream(requestSocket.getOutputStream());
+                                    out.flush();
+                                    in = new ObjectInputStream(requestSocket.getInputStream());
+                                    connectionStatus = true;
+                                    break;
+                                } else {
+                                    System.out.println("Wrong ip or host!");
+                                    break;
                                 }
-                                break;
-                            } else {
-                                System.out.println("You are already logged in");
+                            }
+                        }
+                        case ("login"): {
+                            if (connectionStatus == true) {
+                                if (loginStatus == false) {
+                                    sendMessage("login");
+                                    System.out.println("Please input your username");
+                                    String username = bufferedReader.readLine();
+                                    sendMessage(username);
+                                    System.out.println("Please input yout password");
+                                    String password = bufferedReader.readLine();
+                                    sendMessage(password);
+                                    String response = (String) in.readObject();
+                                    if (response.equals("success")) {
+                                        System.out.println("Login successfully!");
+                                        loginStatus = true;
+                                    } else if (response.equals("fail")) {
+                                        System.out.println("Unmatched username and password");
+                                    }
+                                    break;
+                                } else {
+                                    System.out.println("You are already logged in");
+                                    break;
+                                }
+                            }else {
+                                System.out.println("You have not connect to the server");
                                 break;
                             }
                         }
-                        case ("2"): {
+                        case ("dir"): {
                             if (loginStatus == true) {
                                 sendMessage("dir");
                                 String response = (String) in.readObject();
@@ -88,7 +118,7 @@ public class Client2 {
                                 break;
                             }
                         }
-                        case ("3"): {
+                        case ("get"): {
                             if (loginStatus == false) {
                                 System.out.println("You need to login first");
                                 break;
@@ -97,23 +127,19 @@ public class Client2 {
                                 System.out.println("Input the name of the file you want to get");
                                 String filename = bufferedReader.readLine();
                                 sendMessage(filename);
-                                FileOutputStream fos = new FileOutputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test1.txt");
+                                FileOutputStream fos = new FileOutputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test2.txt");
                                 InputStream is = requestSocket.getInputStream();
                                 //System.out.println("file aquired!");
                                 byte[] bytes = new byte[1024];
                                 int data;
-                                while ((data = is.read()) != -1) {
+                                data = is.read(bytes);
                                     //System.out.println(data);
-                                    fos.write(data);
-                                }
-                                //fos.write(-1);
-                                fos.close();
-                                requestSocket.close();
-                                requestSocket=null;
+                                fos.write(data);
+                                fos.flush();
                                 break;
                             }
                         }
-                        case ("4"): {
+                        case ("upload"): {
                             if (loginStatus == false) {
                                 System.out.println("You need to login first");
                                 break;
@@ -121,13 +147,16 @@ public class Client2 {
                                 sendMessage("upload");
                                 System.out.println("Input the name of the file you want to upload");
                                 String filename = bufferedReader.readLine();
-                                sendMessage(filename);
                                 File dir = new File(filename);
+                                sendMessage(filename);
                                 String status = (String) in.readObject();
                                 if (status.equals("ready")) {
                                     String directory = dir.getAbsolutePath();
+                                    System.out.println(directory);
                                     OutputStream os = requestSocket.getOutputStream();
-                                    FileInputStream fis = new FileInputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test.txt");
+                                    directory="/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test.txt";
+                                    //FileInputStream fis = new FileInputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test.txt");
+                                    FileInputStream fis = new FileInputStream(directory);
                                     byte[] bytes = new byte[1024];
                                     int data;
                                     while ((data = fis.read(bytes)) != -1) {
@@ -136,16 +165,20 @@ public class Client2 {
                                     }
                                     //os.write(-1);
                                     os.flush();
-                                    requestSocket.close();
-                                    requestSocket=null;
+                                    //requestSocket.close();
+                                    //requestSocket=null;
                                     //fis.close();
                                     //os.flush();
                                     //requestSocket.shutdownInput();
+                                    //requestSocket.shutdownOutput();
 
                                     //requestSocket=null;
                                     break;
                                 }
                             }
+                        }
+                        default:{
+                            System.out.println("Unknown command");
                         }
 
 
@@ -190,7 +223,7 @@ public class Client2 {
                 }
 
                  */
-                }
+
             }
         }
         catch (ConnectException e) {
@@ -204,8 +237,7 @@ public class Client2 {
         }
         catch(IOException ioException){
             ioException.printStackTrace();
-        }
-        finally{
+        } finally{
             //Close connections
             try{
                 in.close();

@@ -38,7 +38,7 @@ public class Server2 {
         try {
             while(true) {
                 new Handler(listener.accept(),clientNum).start();
-                //System.out.println("Client "  + clientNum + " is connected!");
+                System.out.println("Client "  + clientNum + " is connected!");
                 clientNum++;
             }
         } finally {
@@ -158,6 +158,7 @@ public class Server2 {
                                        MESSAGE=MESSAGE+"\n"+name;
                                    }
                                     sendMessage(MESSAGE);
+                                    MESSAGE="";
                                     break;
 
                             }
@@ -168,17 +169,21 @@ public class Server2 {
                                 sendMessage("ready");
                                 String directory=dir.getAbsolutePath();
                                 //System.out.println(directory);
-                                FileOutputStream fos = new FileOutputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Server/test.txt");
+                                //FileOutputStream fos = new FileOutputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Server/test.txt");
+                                FileOutputStream fos = new FileOutputStream(directory);
+                                //File testfile=new File("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Server/test.txt");
+                                //System.out.println(testfile.length());
                                 System.out.println(directory);
                                 InputStream is=connection.getInputStream();
                                 //System.out.println("file aquired!");
                                 byte[] bytes = new byte[1024];
                                 int data;
-                                while ((data = is.read(bytes)) != -1) {
+                                data = is.read(bytes);
                                     //System.out.println(data);
-                                    fos.write(bytes,0,data);
-                                }
+                                fos.write(bytes,0,data);
+
                                 //fos.close();
+                                fos.flush();
                                 System.out.println("Upload complete!");
                                 break;
                             }
@@ -192,8 +197,12 @@ public class Server2 {
                                     os.write(bytes, 0, data);
                                     // System.out.println(data);
                                 }
-                                connection.close();
-                                fis.close();
+                                //connection.close();
+                                System.out.println("get complete");
+                                os.flush();
+                                //connection.shutdownOutput();
+                                //fis.close();
+                                //os.close();
                                 break;
                             }
                             /*
@@ -253,7 +262,7 @@ public class Server2 {
                 }
             }
             catch(IOException ioException){
-                //System.out.println("Disconnect with Client " + no);
+                System.out.println("Disconnect with Client " + no);
             }
             finally{
                 //Close connections
@@ -263,7 +272,7 @@ public class Server2 {
                     connection.close();
                 }
                 catch(IOException ioException){
-                    //System.out.println("Disconnect with Client " + no);
+                    System.out.println("Disconnect with Client " + no);
                 }
             }
         }
