@@ -28,7 +28,7 @@ class User{
         this.username = username;
     }
 }
-public class Server2 {
+public class FTPServer {
 
     private static final int sPort = 8000;   //The server will be listening on this port number
     public static void main(String[] args) throws Exception {
@@ -72,7 +72,7 @@ public class Server2 {
             this.connection = connection;
             this.no = no;
         }
-
+/*
         public boolean Login(String Username, String Password){
             if (Username.equals("user1")) {
                 if (Password.equals("1")) {
@@ -85,6 +85,8 @@ public class Server2 {
                 return false;
             }
         }
+
+ */
 
         public String[] getFilenames(){
             File file=new File(".");
@@ -174,9 +176,11 @@ public class Server2 {
                                 //File testfile=new File("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Server/test.txt");
                                 //System.out.println(testfile.length());
                                 System.out.println(directory);
+                                String Strlength=(String)in.readObject();
+                                int length=Integer.parseInt(Strlength)+1024;
                                 InputStream is=connection.getInputStream();
                                 //System.out.println("file aquired!");
-                                byte[] bytes = new byte[1024];
+                                byte[] bytes = new byte[length];
                                 int data;
                                 data = is.read(bytes);
                                     //System.out.println(data);
@@ -193,9 +197,11 @@ public class Server2 {
                                 if (dir.exists()){
                                     sendMessage("true");
                                     String directory=dir.getAbsolutePath();
-                                    FileInputStream fis=new FileInputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Server/test1.txt");
-                                    //FileInputStream fis =new FileInputStream(directory);
+                                    //FileInputStream fis=new FileInputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Server/test1.txt");
+                                    FileInputStream fis =new FileInputStream(directory);
                                     OutputStream os = connection.getOutputStream();
+                                    int length=directory.length();
+                                    sendMessage(String.valueOf(length));
                                     byte[] bytes = new byte[1024];
                                     int data;
 

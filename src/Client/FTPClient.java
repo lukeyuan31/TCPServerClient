@@ -2,12 +2,9 @@ package Client;
 
 import java.net.*;
 import java.io.*;
-import java.nio.*;
-import java.nio.channels.*;
-import java.util.*;
 
 
-public class Client2 {
+public class FTPClient {
     Socket requestSocket;           //socket connect to the server
     ObjectOutputStream out;         //stream write to the socket
     ObjectInputStream in;          //stream read from the socket
@@ -75,7 +72,7 @@ public class Client2 {
                                     connectionStatus = true;
                                     break;
                                 } else {
-                                    System.out.println("Wrong ip or host!");
+                                    System.out.println("Wrong ip or port!");
                                     break;
                                 }
                             }
@@ -103,19 +100,23 @@ public class Client2 {
                                     break;
                                 }
                             }else {
-                                System.out.println("You have not connect to the server");
+                                System.out.println("You have not connected to the server");
                                 break;
                             }
                         }
                         case ("dir"): {
-                            if (loginStatus == true) {
-                                sendMessage("dir");
-                                String response = (String) in.readObject();
-                                System.out.println(response);
-                                break;
-                            } else {
-                                System.out.println("You need to login first");
-                                break;
+                            if(connectionStatus == true) {
+                                if (loginStatus == true) {
+                                    sendMessage("dir");
+                                    String response = (String) in.readObject();
+                                    System.out.println(response);
+                                    break;
+                                } else {
+                                    System.out.println("You need to login first");
+                                    break;
+                                }
+                            }else {
+                                System.out.println("You have not connected to the server");
                             }
                         }
                         case ("get"): {
@@ -135,8 +136,10 @@ public class Client2 {
                                     //FileOutputStream fos = new FileOutputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test2.txt");
                                     FileOutputStream fos = new FileOutputStream(directory);
                                     InputStream is = requestSocket.getInputStream();
+                                    String strlength=(String) in.readObject();
+                                    int length=Integer.parseInt(strlength)+1024;
                                     //System.out.println("file aquired!");
-                                    byte[] bytes = new byte[1024];
+                                    byte[] bytes = new byte[length];
                                     int data;
                                     data = is.read(bytes);
                                     //System.out.println(data);
@@ -160,16 +163,18 @@ public class Client2 {
                                 String filename = inputline[1];
                                 File dir = new File(filename);
                                 if (dir.exists()){
-                                    System.out.println("file exists!");
+                                    //System.out.println("file exists!");
                                     sendMessage("upload");
                                     sendMessage(filename);
                                     String status = (String) in.readObject();
                                 if (status.equals("ready")) {
                                     String directory = dir.getAbsolutePath();
-                                    System.out.println(directory);
+                                    //System.out.println(directory);
                                     OutputStream os = requestSocket.getOutputStream();
                                     //directory = "/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test.txt";
                                     //FileInputStream fis = new FileInputStream("/Users/lukeyuan/IdeaProjects/TCPServerClient/src/Client/test.txt");
+                                    int length= directory.length();
+                                    sendMessage(String.valueOf(length));
                                     FileInputStream fis = new FileInputStream(directory);
                                     byte[] bytes = new byte[1024];
                                     int data;
@@ -284,7 +289,7 @@ public class Client2 {
     //main method
     public static void main(String args[])
     {
-        Client2 client = new Client2();
+        FTPClient client = new FTPClient();
         client.run();
     }
 
